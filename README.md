@@ -19,6 +19,8 @@ Codespaces-friendly Rails dev setup with:
 
 Copy the `.copilot/` and `.devcontainer/` directories into your Rails app.
 
+Optional: Copy `.github/copilot-instructions.md` , tailor it as needed, include architecture decisions and overviews
+
 Configurations you more then likey need to change
 
 in `.devcontainer/Dockerfile`:
