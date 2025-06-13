@@ -1,0 +1,5 @@
+{
+  "testFramework": "rspec",
+  "testDir": "spec",
+  "filePattern": "*_spec.rb"
+}

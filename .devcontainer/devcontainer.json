@@ -1,0 +1,27 @@
+// This devcontainer.json configures a development environment for a Rails 8 app using Docker Compose.
+{
+  "name": "Rails 8 Dev Container",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "runArgs": [
+    "-p", "3000:3000"
+  ],
+  "service": "web",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+    "REDIS_URL": "redis://redis:6379"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        "Shopify.ruby-extensions-pack",
+        "ms-azuretools.vscode-docker",
+        "thadeu.vscode-run-rspec-file"
+      ]
+    }
+  }
+}
