@@ -15,11 +15,24 @@ Codespaces-friendly Rails dev setup with:
 - 🐳 The dev `Dockerfile` mirrors production (uses Fullstaq Ruby in both)
 - 🤖 GitHub Copilot can be instructed inside the devcontainer to open PRs with minimal setup
 
-## Usage
 
-Copy the `.copilot/` and `.devcontainer/` directories into your Rails app.
 
-Optional: Copy `.github/copilot-instructions.md` , tailor it as needed, include architecture decisions and overviews
+## 🧰 Quick Setup
+
+In your existing Rails project (e.g., `eliminator`):
+
+```bash
+# 1. Clone this template repo somewhere (outside your project)
+git clone https://github.com/jeremy04/rails-devcontainer-template.git
+
+# 2. Run the setup wizard, targeting your project
+cd rails-devcontainer-template
+./bin/setup_devcontainer --target ~/projects/eliminator/
+```
+
+## Tweaks
+
+Copy `.github/copilot-instructions.md` , tailor it as needed, include architecture decisions and overviews
 
 Configurations you more then likey need to change
 

@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+require 'optparse'
+
+# --- Color helpers ---
+def color(text, code); "\e[#{code}m#{text}\e[0m"; end
+def green(text); color(text, 32); end
+def yellow(text); color(text, 33); end
+def blue(text); color(text, 34); end
+def red(text); color(text, 31); end
+def bold(text); "\e[1m#{text}\e[22m"; end
+
+# --- Parse options ---
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: ruby setup_devcontainer.rb --target /path/to/project"
+  opts.on("--target PATH", "Path to the target Rails project") { |path| options[:target] = path }
+end.parse!
+
+unless options[:target]
+  puts red("❌ Error: --target is required.")
+  exit 1
+end
+
+target_path = File.expand_path(options[:target])
+unless Dir.exist?(target_path)
+  puts red("❌ Target directory does not exist: #{target_path}")
+  exit 1
+end
+
+template_path = File.expand_path(File.join(__dir__, ".."))
+project_name = File.basename(target_path)
+
+# --- Start UI ---
+puts bold(blue("\n🔧 Rails Devcontainer Setup"))
+puts "Setting up for: #{bold(project_name)}"
+puts "Target:   #{target_path}"
+puts "Template: #{template_path}\n"
+
+# --- Copy folders ---
+copied = false
+
+if File.directory?("#{template_path}/.devcontainer")
+  FileUtils.cp_r("#{template_path}/.devcontainer", target_path, verbose: false)
+  puts green("✔ Copied .devcontainer/")
+  copied = true
+end
+
+if File.directory?("#{template_path}/.copilot")
+  FileUtils.cp_r("#{template_path}/.copilot", target_path, verbose: false)
+  puts green("✔ Copied .copilot/")
+  copied = true
+end
+
+puts yellow("⚠️  No template directories found.") unless copied
+
+# --- Inject POSTGRES_DB ---
+env_path = File.join(target_path, ".devcontainer/.env.devcontainer")
+if File.exist?(env_path)
+  default_db = "#{project_name}_development"
+  print "Enter Postgres DB name [#{default_db}]: "
+  db_name = STDIN.gets.strip
+  db_name = default_db if db_name.empty?
+
+  content = File.read(env_path)
+  content = content.lines.reject { |line| line.strip.start_with?("POSTGRES_DB=") }.join
+  content = content.rstrip + "\nPOSTGRES_DB=#{db_name}\n"
+  File.write(env_path, content)
+
+  puts green("✔ POSTGRES_DB set to #{db_name}")
+else
+  puts yellow("⚠️  Skipped DB setup — .env.devcontainer not found")
+end
+
+puts bold(green("\n✅ All done! Open #{project_name} in Codespaces or VS Code."))
