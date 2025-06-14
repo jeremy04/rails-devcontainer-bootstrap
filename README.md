@@ -23,10 +23,10 @@ In your existing Rails project (e.g., `eliminator`):
 
 ```bash
 # 1. Clone this template repo somewhere (outside your project)
-git clone https://github.com/jeremy04/rails-devcontainer-template.git
+git clone https://github.com/jeremy04/rails-devcontainer-bootstrap.git
 
 # 2. Run the setup wizard, targeting your project
-cd rails-devcontainer-template
+cd rails-devcontainer-bootstrap
 ./bin/setup_devcontainer --target ~/projects/eliminator/
 ```
 
