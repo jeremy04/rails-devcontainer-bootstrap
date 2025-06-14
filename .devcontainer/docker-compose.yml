@@ -18,10 +18,12 @@ services:
       - "6381:6379"
   postgres:
     image: postgres:16-alpine
+    env_file:
+      - .env.devcontainer
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: project_development
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
