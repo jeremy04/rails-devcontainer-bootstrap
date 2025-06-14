@@ -23,7 +23,7 @@ In your existing Rails project (e.g., `eliminator`):
 
 ```bash
 # 1. Clone this template repo somewhere (outside your project)
-git clone https://github.com/YOUR-USERNAME/rails-devcontainer-template.git
+git clone https://github.com/jeremy04/rails-devcontainer-template.git
 
 # 2. Run the setup wizard, targeting your project
 cd rails-devcontainer-template
