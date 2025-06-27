@@ -18,6 +18,8 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
+
+alias awslocal='aws --endpoint-url=http://localstack:4566'
 # --- dotfiles-codespace-marker ---
 EOF
   echo "▶ Appended shell customizations to ~/.bashrc"
