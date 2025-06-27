@@ -12,6 +12,7 @@
   "remoteEnv": {
     "REDIS_URL": "redis://redis:6379"
   },
+  "postCreateCommand": "bash install.sh",
   "customizations": {
     "vscode": {
       "settings": {
