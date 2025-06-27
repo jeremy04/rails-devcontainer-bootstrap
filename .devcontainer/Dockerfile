@@ -21,7 +21,7 @@ RUN curl https://get.volta.sh | bash
 ENV BASH_ENV ~/.bashrc
 ENV VOLTA_HOME /root/.volta
 ENV PATH $VOLTA_HOME/bin:/usr/local/bin:$PATH
-RUN volta install node@${NODE_VERSION} && volta install yarn@YARN_VERSION
+RUN volta install node@${NODE_VERSION} && volta install yarn@${YARN_VERSION}
 
 RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
