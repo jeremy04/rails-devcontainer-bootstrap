@@ -32,6 +32,7 @@ eliminator is a full-stack Ruby on Rails application powered by Hotwire. It foll
 - Write integration ("social") tests that verify actual business logic. Use isolated ("solitary") unit tests sparingly.
 - Use fakes like WebMock in integration tests when appropriate.
 - Prefer RSpec for all testing.
+- Keep tests simple - no begin/rescue, conditionals, or loops in expectations. If a test needs code logic to pass, restructure it.
 
 ## Git Practices
 - Branch names should use author initials followed by a short description with underscores, max 80 characters.
