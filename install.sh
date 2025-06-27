@@ -23,3 +23,25 @@ EOF
   echo "▶ Appended shell customizations to ~/.bashrc"
 fi
 
+# -----------------------------------------------------------------------------
+# Ensure dummy AWS profile exists (for LocalStack / offline dev)
+# Runs as the Codespace user
+# -----------------------------------------------------------------------------
+AWS_DIR="$HOME/.aws"
+if [[ ! -f "$AWS_DIR/credentials" ]]; then
+  mkdir -p "$AWS_DIR"
+
+  cat > "$AWS_DIR/credentials" <<'EOF'
+[default]
+aws_access_key_id = dummy
+aws_secret_access_key = dummy
+EOF
+
+  cat > "$AWS_DIR/config" <<'EOF'
+[default]
+region = us-east-1
+output = json
+EOF
+
+  echo "✔️  Created dummy AWS profile in $AWS_DIR"
+fi

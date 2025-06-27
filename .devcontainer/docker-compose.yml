@@ -12,6 +12,12 @@ services:
     stdin_open: true
     env_file:
       - .env.devcontainer
+  localstack:
+      image: localstack/localstack:latest
+      ports:
+        - "4566:4566"
+      environment:
+        - SERVICES=s3,ssm,lambda
   redis:
     image: redis:7-alpine
     ports:
