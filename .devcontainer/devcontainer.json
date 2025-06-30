@@ -24,5 +24,12 @@
         "thadeu.vscode-run-rspec-file"
       ]
     }
+  },
+   "features": {
+    "./features/awscli_v2": {
+      "localstackVersion": "4.5.0",
+      "awscliVersion": "2.15.39"
+    },
+    "./features/fly": {}
   }
 }

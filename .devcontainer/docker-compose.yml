@@ -8,7 +8,6 @@ services:
     depends_on:
       - redis
       - postgres
-      - localstack
     tty: true
     stdin_open: true
     env_file:
@@ -27,7 +26,9 @@ services:
       - SERVICES=s3,ssm,lambda
     volumes:
       - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
-
+    profiles:
+      - aws
+ 
   redis:
     image: redis:7-alpine
     ports:

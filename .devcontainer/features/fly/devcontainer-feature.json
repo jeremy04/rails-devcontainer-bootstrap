@@ -1,0 +1,6 @@
+{
+  "id": "flyio",
+  "version": "1.0.0", 
+  "name": "Fly.io CLI",
+  "description": "Installs Fly.io CLI for deployment"
+}
