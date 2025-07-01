@@ -1,16 +1,13 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 LOCALSTACK_CLI_VERSION="${LOCALSTACKVERSION:-4.5.0}"
 AWSCLI_VERSION="${AWSCLIVERSION:-2.15.39}"
 
-echo "debug env:"
-printenv
-
 echo "Installing AWS tools..."
 # Install AWS CLI v2
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "awscliv2.zip" && \
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "awscliv2.zip" && \
 unzip -q awscliv2.zip && \
 ./aws/install && \
 rm -rf awscliv2.zip aws
