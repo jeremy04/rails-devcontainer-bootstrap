@@ -19,6 +19,8 @@ shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
 
+export PATH="~/.local/bin:$PATH" # For claude and other user installs
+
 alias awslocal='aws --endpoint-url=http://localstack:4566'
 # --- dotfiles-codespace-marker ---
 EOF
