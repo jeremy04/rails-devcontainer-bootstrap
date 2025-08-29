@@ -27,6 +27,9 @@ FROM base as build_deps
 ARG DEV_PACKAGES="git build-essential libpq-dev wget vim gzip xz-utils libsqlite3-dev libyaml-dev curl unzip"
 ENV DEV_PACKAGES ${DEV_PACKAGES}
 
+# Install claude code assistant
+RUN curl -fsSL claude.ai/install.sh | bash
+
 # Install core dev packages
 RUN --mount=type=cache,id=dev-apt-cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,id=dev-apt-lib,sharing=locked,target=/var/lib/apt \
