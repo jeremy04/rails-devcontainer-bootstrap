@@ -27,8 +27,7 @@
   },
    "features": {
     "./features/awscli_v2": {
-      "localstackVersion": "4.5.0",
-      "awscliVersion": "2.15.39"
+      "localstackVersion": "4.5.0"
     },
     "./features/fly": {}
   }

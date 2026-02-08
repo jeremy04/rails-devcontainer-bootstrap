@@ -1,61 +1,32 @@
 # syntax=docker/dockerfile:1
-ARG RUBY_VERSION=3.3
-ARG VARIANT=jemalloc-slim
-FROM quay.io/evl.ms/fullstaq-ruby:${RUBY_VERSION}-${VARIANT} as base
+ARG RUBY_VERSION=4.0
+FROM ruby:${RUBY_VERSION}-alpine AS base
 
-ARG NODE_VERSION=20.12.2
-ARG BUNDLER_VERSION=2.4.21
-ARG YARN_VERSION=1.22.19
+ARG BUNDLER_VERSION=4.0.4
 
-ENV RAILS_SERVE_STATIC_FILES true
-ENV RAILS_LOG_TO_STDOUT true
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV RAILS_LOG_TO_STDOUT=true
 
 RUN mkdir -p /workspace/tmp/pids
 WORKDIR /workspace
 
+# Install all packages in a single layer
+# Dev: build-base(gcc/make), postgresql-dev, sqlite-dev, yaml-dev
+# Tools: git, vim, curl, bash, github-cli, nodejs, npm, yarn
+RUN apk add --no-cache \
+    bash build-base curl gzip git unzip vim wget xz \
+    libpq-dev sqlite-dev yaml-dev \
+    nodejs npm yarn \
+    github-cli
+
 SHELL ["/bin/bash", "-c"]
 
-RUN curl https://get.volta.sh | bash
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
 
-ENV BASH_ENV ~/.bashrc
-ENV VOLTA_HOME /root/.volta
-ENV PATH $VOLTA_HOME/bin:/usr/local/bin:$PATH
-RUN volta install node@${NODE_VERSION} && volta install yarn@${YARN_VERSION}
-
-FROM base as build_deps
-
-ARG DEV_PACKAGES="git build-essential libpq-dev wget vim gzip xz-utils libsqlite3-dev libyaml-dev curl unzip"
-ENV DEV_PACKAGES ${DEV_PACKAGES}
-
-# Install claude code assistant
-RUN curl -fsSL claude.ai/install.sh | bash
-
-# Install core dev packages
-RUN --mount=type=cache,id=dev-apt-cache,sharing=locked,target=/var/cache/apt \
-    --mount=type=cache,id=dev-apt-lib,sharing=locked,target=/var/lib/apt \
-    apt-get update -qq && \
-    apt-get install --no-install-recommends -y ${DEV_PACKAGES}
-
-# Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-      | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
-      https://cli.github.com/packages stable main" \
-      > /etc/apt/sources.list.d/github-cli.list && \
-    apt-get update -qq && \
-    apt-get install --no-install-recommends -y gh
-
-# Clean up APT caches
-RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
-
-FROM build_deps as gems
-
+# Install Bundler
 RUN gem install -N bundler -v ${BUNDLER_VERSION}
 
-COPY Gemfile* ./
-
-FROM build_deps as node_modules
-
-COPY package*json ./
-COPY yarn.* ./
+# Bash env for interactive use
+ENV BASH_ENV=~/.bashrc
+ENV PATH="/root/.local/bin:$PATH"
