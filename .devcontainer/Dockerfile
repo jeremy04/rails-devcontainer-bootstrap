@@ -1,61 +1,74 @@
 # syntax=docker/dockerfile:1
-ARG RUBY_VERSION=3.3
-ARG VARIANT=jemalloc-slim
-FROM quay.io/evl.ms/fullstaq-ruby:${RUBY_VERSION}-${VARIANT} as base
 
-ARG NODE_VERSION=20.12.2
-ARG BUNDLER_VERSION=2.4.21
-ARG YARN_VERSION=1.22.19
+# Stage 1: Get Node.js binaries
+FROM node:20-alpine AS node
 
-ENV RAILS_SERVE_STATIC_FILES true
-ENV RAILS_LOG_TO_STDOUT true
+# Stage 2: Base Ruby + Node runtime
+FROM ruby:4.0-alpine AS base
+
+ARG YARN_VERSION=1.22.22
+
+# Node requires libstdc++ which isn't in the base ruby alpine image
+RUN apk add --no-cache libstdc++
+
+# Copy Node.js from node stage
+COPY --from=node /usr/local/bin/node /usr/local/bin/
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# Install Yarn
+RUN npm install -g yarn@${YARN_VERSION}
+
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV RAILS_LOG_TO_STDOUT=true
 
 RUN mkdir -p /workspace/tmp/pids
 WORKDIR /workspace
 
+# Stage 3: Dev dependencies
+FROM base AS build_deps
+
+# Install system dependencies for Rails development
+RUN apk add --no-cache \
+    bash \
+    build-base \
+    curl \
+    github-cli \
+    git \
+    gzip \
+    postgresql16-dev \
+    sqlite-dev \
+    sudo \
+    tzdata \
+    unzip \
+    xz \
+    yaml-dev
+
 SHELL ["/bin/bash", "-c"]
 
-RUN curl https://get.volta.sh | bash
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
 
-ENV BASH_ENV ~/.bashrc
-ENV VOLTA_HOME /root/.volta
-ENV PATH $VOLTA_HOME/bin:/usr/local/bin:$PATH
-RUN volta install node@${NODE_VERSION} && volta install yarn@${YARN_VERSION}
+# Create non-root dev user with passwordless sudo
+RUN addgroup -g 1000 -S devuser && \
+    adduser -u 1000 -S devuser -G devuser -s /bin/bash -h /home/devuser && \
+    echo "devuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/devuser
 
-FROM base as build_deps
+# Ensure gem/bundle paths are writable
+RUN chown -R devuser:devuser /usr/local/bundle
 
-ARG DEV_PACKAGES="git build-essential libpq-dev wget vim gzip xz-utils libsqlite3-dev libyaml-dev curl unzip"
-ENV DEV_PACKAGES ${DEV_PACKAGES}
+RUN chown -R devuser:devuser /workspace
 
-# Install claude code assistant
-RUN curl -fsSL claude.ai/install.sh | bash
+USER devuser
 
-# Install core dev packages
-RUN --mount=type=cache,id=dev-apt-cache,sharing=locked,target=/var/cache/apt \
-    --mount=type=cache,id=dev-apt-lib,sharing=locked,target=/var/lib/apt \
-    apt-get update -qq && \
-    apt-get install --no-install-recommends -y ${DEV_PACKAGES}
-
-# Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-      | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
-      https://cli.github.com/packages stable main" \
-      > /etc/apt/sources.list.d/github-cli.list && \
-    apt-get update -qq && \
-    apt-get install --no-install-recommends -y gh
-
-# Clean up APT caches
-RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
-
-FROM build_deps as gems
-
-RUN gem install -N bundler -v ${BUNDLER_VERSION}
+# Stage 4: Gem dependencies
+FROM build_deps AS gems
 
 COPY Gemfile* ./
 
-FROM build_deps as node_modules
+# Stage 5: Node dependencies
+FROM build_deps AS node_modules
 
 COPY package*json ./
 COPY yarn.* ./
